@@ -1,0 +1,13 @@
+.table {
+    width: 100%;
+    text-align: center;
+}
+
+th {
+    font-weight: 700;
+    color: #2a9fd6;
+}
+
+th, td {
+    border: 1px solid #2a9fd6;
+}
