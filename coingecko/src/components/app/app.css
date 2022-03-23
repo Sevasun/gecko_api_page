@@ -1,4 +1,4 @@
-.table {
+.coin-table {
     width: 100%;
     text-align: center;
 }
@@ -6,8 +6,33 @@
 th {
     font-weight: 700;
     color: #2a9fd6;
+    font-size: 1.25em;
+    padding: 1em;
+}
+
+td {
+    padding: 0.5em;
 }
 
 th, td {
     border: 1px solid #2a9fd6;
+}
+
+.small {
+    font-size: 0.75em;
+    margin: 0 .5em;
+}
+
+.small:before {
+    content: '(';
+}
+
+.small:after {
+    content: ')';
+}
+
+.coin-image {
+    vertical-align: top;
+    max-width: 100%;
+    width: 30px;
 }
