@@ -23,7 +23,7 @@ export default class GeckoApi {
         }).then((json) => console.log(json));
     }
 
-    coinsList = () => {
+    coinsList = async () => {
         const options = {
             vs_currency: 'usd',
             order: 'market_cap_desc',
@@ -35,7 +35,7 @@ export default class GeckoApi {
 
         const url = this.transformUrl('coins/markets', options);
 
-        const request = fetch(url).then((resp) => resp.json());
+        const request = await fetch(url).then((resp) => resp.json());
 
         return request;
     }
