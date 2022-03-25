@@ -2,12 +2,14 @@ import React, { Component } from "react";
 import GeckoApi from "../../modules/gecko/gecko";
 import Loader from "../loader";
 import './table.css';
+import FavoritesButton from "../favorites-button";
 
 export default class Table extends Component {
   api = new GeckoApi();
 
   state = {
-    coins: null
+    coins: null,
+    ids: []
   }
 
   componentDidMount() {
@@ -16,7 +18,6 @@ export default class Table extends Component {
 
   componentDidUpdate(prevProps) {
     if (this.props.reload !== prevProps.reload) {
-      console.log('reload');
       this.updateCoinList();
     }
   }
@@ -29,10 +30,26 @@ export default class Table extends Component {
     });
   }
 
+  onFavorite = (id) => {
+    const { ids } = this.state;
+    let newIds;
+    const idx = ids.indexOf(id);
+
+    if (idx === -1) {
+      newIds = [...ids, id];
+    } else {
+      newIds = [...ids.slice(0, idx), ...ids.slice(idx + 1)];
+    }
+    this.setState({
+      ids: newIds
+    })
+  }
+
   render() {
     if (!this.state.coins) {
       return <Loader />;
     }
+    console.log(this.state.ids);
 
     const round = (number) => {
       const module = Math.abs(+number);
@@ -82,9 +99,7 @@ export default class Table extends Component {
       return (
         <tr key={id}>
           <td>
-            <button className="star-btn">
-              <span className="icon-star-full"></span>
-            </button>
+            <FavoritesButton onFavorite={ this.onFavorite } id={id} />
           </td>
           <td>{ market_cap_rank }</td>
           <td>{ name }</td>

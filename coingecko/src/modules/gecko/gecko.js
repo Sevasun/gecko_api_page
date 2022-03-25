@@ -5,7 +5,16 @@ export default class GeckoApi {
         let fullUrl = `${this._baseUrl}${url}`;
         let optionsUrl = '?';
         if (options) {
-            Object.entries(options).map(([key, value]) => optionsUrl = `${optionsUrl}${key}=${value}&`);
+            Object.entries(options).map(([key, value]) => {
+                if (key === 'ids' && !value) {
+                    return optionsUrl;
+                }
+                if (key === 'ids' && value) {
+                    value = value.replace(', ', '%2C%20');
+                }
+                optionsUrl = `${optionsUrl}${key}=${value}&`;
+                return optionsUrl;
+            });
             optionsUrl = optionsUrl.substring(0, optionsUrl.length - 1);
             fullUrl += optionsUrl;
         }
@@ -23,14 +32,15 @@ export default class GeckoApi {
         }).then((json) => console.log(json));
     }
 
-    coinsList = async () => {
+    coinsList = async (ids = null) => {
         const options = {
             vs_currency: 'usd',
             order: 'market_cap_desc',
             per_page: '50',
             page: '1',
             sparkline: 'false',
-            price_change_percentage: '24h'
+            price_change_percentage: '24h',
+            ids: ids
         }
 
         const url = this.transformUrl('coins/markets', options);
