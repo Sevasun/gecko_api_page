@@ -9,7 +9,7 @@ export default class FavoritesButton extends Component {
     this.setState((prevState) => {
       return {isActive: !prevState.isActive}
     });
-    this.props.onFavorite(this.props.id);
+    this.props.onFavorite();
   }
 
   render() {

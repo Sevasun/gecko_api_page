@@ -1,31 +1,96 @@
 import React, { Component } from "react";
+import GeckoApi from "../../modules/gecko";
 import './app.css';
 import Table from "../table/table";
 import Tabs from "../tabs";
 import Reload from "../reload";
 
 export default class App extends Component {
+  api = new GeckoApi();
+
   state = {
-    reload: false
+    activeTab: null,
+    coins: null,
+    ids: []
+  }
+
+  tabs = [
+    {id: 'tab-1', value: 'All coins', fn: (id) => this.setDefaultTab(id)},
+    {id: 'tab-2', value: 'Favorites', fn: (id) => this.setFavoriteTab(id)},
+    {id: 'tab-3', value: 'To do', fn: null}
+  ];
+
+  componentDidMount() {
+    this.setActiveTab();
+    this.updateCoinList();
   }
 
   componentDidUpdate() {
-    if (this.state.reload) {
+    
+  };
+
+  updateCoinList = (ids) => {
+    const idList = ids && ids.length ? ids.join(', ') : null;
+
+    this.api.coinsList(idList).then((array) => {
       this.setState({
-        reload: false
+        coins: array
       })
-    }
+    });
   }
 
   onReload = () => {
+    const { activeTab } = this.state;
+    this.tabs.map((tab) => {
+      if (tab.id === activeTab) {
+        tab.fn(tab.id);
+      }
+    });
+  };
+
+  setActiveTab = (id) => {
+    if (!id) {
+      this.setState({
+        activeTab: this.tabs[0].id
+      });
+      return;
+    }
+
     this.setState({
-      reload: true
+      activeTab: id
+    });
+  };
+
+  setDefaultTab = (id) => {
+    this.setActiveTab(id);
+    this.updateCoinList();
+  }
+
+  setFavoriteTab = (id) => {
+    this.setActiveTab(id);
+
+    if (!this.state.ids.length) {
+      console.log('Sorry, you doesnt select any favorite coins');
+    }
+    this.updateCoinList(this.state.ids);
+  };
+
+  onFavoriteClick = (id) => {
+    const { ids } = this.state;
+    let newIds;
+    const idx = ids.indexOf(id);
+
+    if (idx === -1) {
+      newIds = [...ids, id];
+    } else {
+      newIds = [...ids.slice(0, idx), ...ids.slice(idx + 1)];
+    }
+    this.setState({
+      ids: newIds
     })
   }
 
   render() {
-    const reloadKey = this.state.reload ? true : null;
-
     return (
       <div className="App">
         <div className="container">
@@ -36,7 +101,7 @@ export default class App extends Component {
                 <span className="navbar-toggler-icon"></span>
               </button>
               <div className="collapse navbar-collapse" id="navbarSupportedContent">
-                <Tabs />
+                <Tabs tabs={ this.tabs } activeTab={ this.state.activeTab } />
               </div>
             </nav>
           </header>
@@ -44,7 +109,7 @@ export default class App extends Component {
             <div className="col-12">
               <div className="content">
                 <div className="tab">
-                  <Table reload={reloadKey} />
+                  <Table coins={ this.state.coins } onFavorite={ this.onFavoriteClick } />
                   <div className="pagination d-flex justify-content-between my-3">
                     <button className="btn btn-primary">Prev</button>
                     <button className="btn btn-primary">Next</button>
