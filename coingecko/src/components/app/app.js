@@ -4,6 +4,7 @@ import './app.css';
 import Table from "../table/table";
 import Tabs from "../tabs";
 import Reload from "../reload";
+import Popup from "../popup";
 
 export default class App extends Component {
   api = new GeckoApi();
@@ -11,7 +12,8 @@ export default class App extends Component {
   state = {
     activeTab: null,
     coins: null,
-    ids: []
+    ids: [],
+    popupOpen: false
   }
 
   tabs = [
@@ -88,9 +90,23 @@ export default class App extends Component {
     this.setState({
       ids: newIds
     })
+  };
+
+  openPopup = (id) => {
+    this.setState({
+      popupOpen: id
+    });
+  };
+
+  closePopup = () => {
+    this.setState({
+      popupOpen: null
+    })
   }
 
   render() {
+    const popup = this.state.popupOpen ? <Popup id={ this.state.popupOpen } closePopup={this.closePopup} /> : null;
+
     return (
       <div className="App">
         <div className="container">
@@ -109,7 +125,7 @@ export default class App extends Component {
             <div className="col-12">
               <div className="content">
                 <div className="tab">
-                  <Table coins={ this.state.coins } onFavorite={ this.onFavoriteClick } />
+                  <Table coins={ this.state.coins } onFavorite={ this.onFavoriteClick } onCoinClick={ this.openPopup } />
                   <div className="pagination d-flex justify-content-between my-3">
                     <button className="btn btn-primary">Prev</button>
                     <button className="btn btn-primary">Next</button>
@@ -119,6 +135,7 @@ export default class App extends Component {
             </div>
           </div>
         </div>
+        { popup }
       </div>
     );
   }

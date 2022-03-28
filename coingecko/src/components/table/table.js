@@ -4,10 +4,11 @@ import Loader from "../loader";
 import './table.css';
 import FavoritesButton from "../favorites-button";
 import { round, spanColor } from "../../modules/helpers";
+import Coin from "../coin";
 
 export default class Table extends Component {
-  render() {
-    const { coins } = this.props;
+    render() {
+    const { coins, onCoinClick } = this.props;
 
     if (!coins) {
       return <Loader />;
@@ -32,7 +33,11 @@ export default class Table extends Component {
             <FavoritesButton onFavorite={ () => {this.props.onFavorite(id)} } />
           </td>
           <td>{ market_cap_rank }</td>
-          <td>{ name }</td>
+          <td>
+            <Coin onCoinClick={() => { onCoinClick(id) }}>
+              { name }
+            </Coin>
+          </td>
           <td>
             <span className="fw-bold text-white">{ symbol.toUpperCase() }</span>
           </td>
@@ -57,8 +62,6 @@ export default class Table extends Component {
         </tr>
       );
     })
-
-    // const { name, current_price, id, symbol, image, price_change_24h, price_change_percentage_24h } = this.state.coins;
 
     return (
       <table className="coin-table">
