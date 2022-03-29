@@ -5,6 +5,7 @@ import Table from "../table/table";
 import Tabs from "../tabs";
 import Reload from "../reload";
 import Popup from "../popup";
+import Pagination from "../pagination";
 
 export default class App extends Component {
   api = new GeckoApi();
@@ -13,7 +14,8 @@ export default class App extends Component {
     activeTab: null,
     coins: null,
     ids: [],
-    popupOpen: false
+    popupOpen: false,
+    page: 1
   }
 
   tabs = [
@@ -27,14 +29,21 @@ export default class App extends Component {
     this.updateCoinList();
   }
 
-  componentDidUpdate() {
-    
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.ids !== prevState.ids || this.state.page !== prevState.page) {
+      this.updateCoinList(this.state.ids, this.state.page);
+    }
   };
 
-  updateCoinList = (ids) => {
+  updateCoinList = (ids, page = null) => {
     const idList = ids && ids.length ? ids.join(', ') : null;
 
-    this.api.coinsList(idList).then((array) => {
+    const options = {
+      ids: idList,
+      page: page
+    };
+
+    this.api.coinsList(options).then((array) => {
       this.setState({
         coins: array
       })
@@ -102,6 +111,24 @@ export default class App extends Component {
     this.setState({
       popupOpen: null
     })
+  };
+
+  onClickPrev = () => {
+    if (+this.state.page > 1) {
+      this.setState((prevState) => {
+        return {
+          page: prevState.page - 1
+        }
+      });
+    }
+  };
+
+  onClickNext = () => {
+    this.setState((prevState) => {
+      return {
+        page: prevState.page + 1
+      }
+    });
   }
 
   render() {
@@ -125,11 +152,10 @@ export default class App extends Component {
             <div className="col-12">
               <div className="content">
                 <div className="tab">
-                  <Table coins={ this.state.coins } onFavorite={ this.onFavoriteClick } onCoinClick={ this.openPopup } />
-                  <div className="pagination d-flex justify-content-between my-3">
-                    <button className="btn btn-primary">Prev</button>
-                    <button className="btn btn-primary">Next</button>
-                  </div>
+                  <Table coins={ this.state.coins } 
+                          onFavorite={ this.onFavoriteClick } 
+                          onCoinClick={ this.openPopup } />
+                  <Pagination onClickPrev={this.onClickPrev} onClickNext={this.onClickNext} currentPage={this.state.page} />
                 </div>
               </div>
             </div>

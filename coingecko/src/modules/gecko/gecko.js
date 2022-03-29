@@ -34,19 +34,28 @@ export default class GeckoApi {
       .then((json) => console.log(json));
   };
 
-  coinsList = async (ids = null) => {
-    const options = {
+  coinsList = async (options) => {
+    const defaults = {
       vs_currency: "usd",
       order: "market_cap_desc",
-      per_page: "50",
-      page: "1",
+      per_page: 50,
+      page: 1,
       sparkline: "false",
-      price_change_percentage: "24h",
-      ids: ids
+      price_change_percentage: "24h"
     };
-    console.log("request");
+    let clearOptions = {};
 
-    const url = this.transformUrl("coins/markets", options);
+    if (options) {
+      for (let prop in options) {
+        if (options[prop]) {
+          clearOptions[prop] = options[prop]
+        }
+      }
+    }
+
+    const optionsObject = { ...defaults, ...clearOptions };
+
+    const url = this.transformUrl("coins/markets", optionsObject);
 
     const request = await fetch(url).then((resp) => resp.json());
 

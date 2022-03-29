@@ -24,8 +24,8 @@ export default class Table extends Component {
               price_change_24h, 
               price_change_percentage_24h } = coin;
 
-      const price_change_percent = spanColor(+price_change_percentage_24h.toFixed(3) + '%');
-      const price_change = spanColor(round(price_change_24h));      
+      const price_change_percent = price_change_percentage_24h ? spanColor(+price_change_percentage_24h.toFixed(3) + '%') : null;
+      const price_change = price_change_24h ? spanColor(round(price_change_24h)) : null;      
 
       return (
         <tr key={id}>
