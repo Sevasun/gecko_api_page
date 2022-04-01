@@ -13,9 +13,16 @@ export default class App extends Component {
   state = {
     activeTab: null,
     coins: null,
-    ids: [],
     popupOpen: false,
-    page: 1
+    options: {
+      ids: [],
+      vs_currency: "usd",
+      order: "market_cap_desc",
+      per_page: 50,
+      page: 1,
+      sparkline: "false",
+      price_change_percentage: "24h"
+    }
   }
 
   tabs = [
@@ -30,20 +37,21 @@ export default class App extends Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.ids !== prevState.ids || this.state.page !== prevState.page) {
-      this.updateCoinList(this.state.ids, this.state.page);
+    if (this.state.options !== prevState.options) {
+      this.updateCoinList(this.state.options);
     }
   };
 
-  updateCoinList = (ids, page = null) => {
-    const idList = ids && ids.length ? ids.join(', ') : null;
+  updateCoinList = (options = {}) => {
+    this.setState({
+      coins: null
+    });
 
-    const options = {
-      ids: idList,
-      page: page
-    };
+    const idList = options.ids === this.state.options.ids ? options.ids.join(', ') : null;
 
-    this.api.coinsList(options).then((array) => {
+    const newOptions = { ...this.state.options, ...options, ids: idList };
+
+    this.api.coinsList(newOptions).then((array) => {
       this.setState({
         coins: array
       })
@@ -80,14 +88,14 @@ export default class App extends Component {
   setFavoriteTab = (id) => {
     this.setActiveTab(id);
 
-    if (!this.state.ids.length) {
+    if (!this.state.options.ids.length) {
       console.log('Sorry, you doesnt select any favorite coins');
     }
-    this.updateCoinList(this.state.ids);
+    this.updateCoinList(this.state.options);
   };
 
   onFavoriteClick = (id) => {
-    const { ids } = this.state;
+    const { ids } = this.state.options;
     let newIds;
     const idx = ids.indexOf(id);
 
@@ -96,8 +104,11 @@ export default class App extends Component {
     } else {
       newIds = [...ids.slice(0, idx), ...ids.slice(idx + 1)];
     }
+
+    const options = {...this.state.options, ids: newIds};
+  
     this.setState({
-      ids: newIds
+      options: options
     })
   };
 
@@ -114,10 +125,11 @@ export default class App extends Component {
   };
 
   onClickPrev = () => {
-    if (+this.state.page > 1) {
+    if (+this.state.options.page > 1) {
       this.setState((prevState) => {
+        const options = {...prevState.options, page: prevState.options.page - 1};
         return {
-          page: prevState.page - 1
+          options: options
         }
       });
     }
@@ -125,9 +137,18 @@ export default class App extends Component {
 
   onClickNext = () => {
     this.setState((prevState) => {
+      const options = {...prevState.options, page: prevState.options.page + 1};
       return {
-        page: prevState.page + 1
+        options: options
       }
+    });
+  };
+
+  onQuantitySelect = (value) => {
+    const options = {...this.state.options, per_page: +value};
+
+    this.setState({
+      options: options
     });
   }
 
@@ -155,7 +176,10 @@ export default class App extends Component {
                   <Table coins={ this.state.coins } 
                           onFavorite={ this.onFavoriteClick } 
                           onCoinClick={ this.openPopup } />
-                  <Pagination onClickPrev={this.onClickPrev} onClickNext={this.onClickNext} currentPage={this.state.page} />
+                  <Pagination onClickPrev={this.onClickPrev} 
+                              onClickNext={this.onClickNext} 
+                              onSelect={this.onQuantitySelect}
+                              currentOptions={this.state.options} />
                 </div>
               </div>
             </div>

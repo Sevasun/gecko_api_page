@@ -1,0 +1,12 @@
+.label {
+    font-size: 11px;
+    display: block;
+    margin-bottom: 4px;
+}
+
+select {
+    font-size: 12px;
+    line-height: 1.5;
+    min-width: 60px;
+    width: 100%;
+}
