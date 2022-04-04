@@ -73,4 +73,12 @@ export default class GeckoApi {
 
     return request;
   }
+
+  searchCoin = async (searchText) => {
+    const url = this.transformUrl(`search?query=${searchText}`, null);
+
+    const request = await fetch(url).then((resp) => resp.json());
+
+    return request;
+  }
 }

@@ -8,7 +8,7 @@ import Coin from "../coin";
 
 export default class Table extends Component {
     render() {
-    const { coins, onCoinClick } = this.props;
+    const { coins, onCoinClick, favorites } = this.props;
 
     if (!coins) {
       return <Loader />;
@@ -16,13 +16,13 @@ export default class Table extends Component {
 
     const rows = coins.map((coin) => {
       let { name, 
-              current_price, 
-              id, 
-              symbol, 
-              market_cap_rank, 
-              image, 
-              price_change_24h, 
-              price_change_percentage_24h } = coin;
+            current_price, 
+            id, 
+            symbol, 
+            market_cap_rank, 
+            image, 
+            price_change_24h, 
+            price_change_percentage_24h } = coin;
 
       const price_change_percent = price_change_percentage_24h ? spanColor(+price_change_percentage_24h.toFixed(3) + '%') : null;
       const price_change = price_change_24h ? spanColor(round(price_change_24h)) : null;      
@@ -30,7 +30,9 @@ export default class Table extends Component {
       return (
         <tr key={id}>
           <td>
-            <FavoritesButton onFavorite={ () => {this.props.onFavorite(id)} } />
+            <FavoritesButton favorites={favorites}
+                              coin={id}
+                              onFavorite={ () => {this.props.onFavorite(id)} } />
           </td>
           <td>{ market_cap_rank }</td>
           <td>

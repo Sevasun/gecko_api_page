@@ -1,0 +1,28 @@
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #333;
+    border: 1px solid var(--bs-primary);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 3;
+}
+
+.dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.dropdown::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+.dropdown::-webkit-scrollbar-thumb {
+    background-color: var(--bs-success);
+}
+
+.dropdown .position {
+    min-width: 35px;
+    display: inline-block;
+    text-align: center;
+}

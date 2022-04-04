@@ -2,14 +2,28 @@ import React, { Component } from "react";
 
 export default class FavoritesButton extends Component {
   state = {
-    isActive: false,
+    isActive: false
   };
+
+  componentDidMount() {
+    this.checkFavorite();
+  }
 
   onButtonClick = () => {
     this.setState((prevState) => {
       return {isActive: !prevState.isActive}
     });
     this.props.onFavorite();
+  }
+
+  checkFavorite = () => {
+    const { favorites, coin } = this.props;
+    
+    if (favorites.length && favorites.includes(coin)) {
+      this.setState({
+        isActive: true
+      })
+    }
   }
 
   render() {

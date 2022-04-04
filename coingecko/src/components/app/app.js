@@ -6,19 +6,27 @@ import Tabs from "../tabs";
 import Reload from "../reload";
 import Popup from "../popup";
 import Pagination from "../pagination";
+import TabContent from "../tab-content";
+import ErrorMessage from "../error-message/error-message";
+import Select from "../select";
+import SearchForm from "../search-form";
+import { selectAutoReloadTiming } from "../../modules/helpers/data";
 
 export default class App extends Component {
   api = new GeckoApi();
 
   state = {
     activeTab: null,
+    error: null,
     coins: null,
     popupOpen: false,
+    reloadTime: null,
+    ids: [],
     options: {
-      ids: [],
+      ids: null,
       vs_currency: "usd",
       order: "market_cap_desc",
-      per_page: 50,
+      per_page: 10,
       page: 1,
       sparkline: "false",
       price_change_percentage: "24h"
@@ -34,20 +42,31 @@ export default class App extends Component {
   componentDidMount() {
     this.setActiveTab();
     this.updateCoinList();
+    this.autoReload = this.state.reloadTime ? setInterval(this.onReload, this.state.reloadTime) : null;
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (this.state.options !== prevState.options) {
       this.updateCoinList(this.state.options);
+      clearInterval(this.autoReload);
+      this.autoReload = this.state.reloadTime ? setInterval(this.onReload, +this.state.reloadTime) : null;
+    }
+    if (this.state.reloadTime !== prevState.reloadTime) {
+      clearInterval(this.autoReload);
+      this.autoReload = this.state.reloadTime ? setInterval(this.onReload, +this.state.reloadTime) : null;
     }
   };
 
-  updateCoinList = (options = {}) => {
+  componentWillUnmount() {
+    clearInterval(this.autoReload);
+  }
+
+  updateCoinList = (options = {}, ids) => {
     this.setState({
       coins: null
     });
 
-    const idList = options.ids === this.state.options.ids ? options.ids.join(', ') : null;
+    const idList = ids && ids.length ? ids.join(', ') : null;
 
     const newOptions = { ...this.state.options, ...options, ids: idList };
 
@@ -76,7 +95,8 @@ export default class App extends Component {
     }
 
     this.setState({
-      activeTab: id
+      activeTab: id,
+      error: null
     });
   };
 
@@ -88,14 +108,18 @@ export default class App extends Component {
   setFavoriteTab = (id) => {
     this.setActiveTab(id);
 
-    if (!this.state.options.ids.length) {
-      console.log('Sorry, you doesnt select any favorite coins');
+    if (!this.state.ids.length) {
+      this.setState({
+        error: true
+      });
+      return;
     }
-    this.updateCoinList(this.state.options);
+
+    this.updateCoinList(this.state.options, this.state.ids);
   };
 
   onFavoriteClick = (id) => {
-    const { ids } = this.state.options;
+    const { ids } = this.state;
     let newIds;
     const idx = ids.indexOf(id);
 
@@ -104,11 +128,9 @@ export default class App extends Component {
     } else {
       newIds = [...ids.slice(0, idx), ...ids.slice(idx + 1)];
     }
-
-    const options = {...this.state.options, ids: newIds};
   
     this.setState({
-      options: options
+      ids: newIds
     })
   };
 
@@ -152,14 +174,41 @@ export default class App extends Component {
     });
   }
 
+  onSetReloadTime = (value) => {
+    this.setState({
+      reloadTime: value > 0 ? value : null
+    });
+  };
+
   render() {
     const popup = this.state.popupOpen ? <Popup id={ this.state.popupOpen } closePopup={this.closePopup} /> : null;
+    const tabContent = !this.state.error 
+                        ? (
+                          <TabContent>
+                            <Table coins={ this.state.coins } 
+                                    favorites={this.state.ids}
+                                    onFavorite={ this.onFavoriteClick } 
+                                    onCoinClick={ this.openPopup } />
+
+                            <Pagination onClickPrev={this.onClickPrev} 
+                                        onClickNext={this.onClickNext} 
+                                        onSelect={this.onQuantitySelect}
+                                        currentOptions={this.state.options} />
+                          </TabContent>
+                        )
+                        : <ErrorMessage title='Sorry' message='You didnt select any favorite coin' /> ;
 
     return (
       <div className="App">
         <div className="container">
           <header className="page-header">
-            <Reload onReload={ this.onReload } />
+            <div className="header-top d-flex justify-content-between align-items-center my-3">
+              <Select label="Auto Reload" defaultValue='0' 
+                                            options={ selectAutoReloadTiming } 
+                                            onSelect={ this.onSetReloadTime } />
+              <SearchForm />
+              <Reload onReload={ this.onReload } />
+            </div>
             <nav className="navbar navbar-expand-lg">
               <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span className="navbar-toggler-icon"></span>
@@ -171,17 +220,7 @@ export default class App extends Component {
           </header>
           <div className="row">
             <div className="col-12">
-              <div className="content">
-                <div className="tab">
-                  <Table coins={ this.state.coins } 
-                          onFavorite={ this.onFavoriteClick } 
-                          onCoinClick={ this.openPopup } />
-                  <Pagination onClickPrev={this.onClickPrev} 
-                              onClickNext={this.onClickNext} 
-                              onSelect={this.onQuantitySelect}
-                              currentOptions={this.state.options} />
-                </div>
-              </div>
+              { tabContent }
             </div>
           </div>
         </div>
