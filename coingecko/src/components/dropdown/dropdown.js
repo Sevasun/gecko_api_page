@@ -2,10 +2,10 @@ import React from "react";
 import './dropdown.css';
 
 const Dropdown = (props) => {
-  const { coinList = [] } = props;
+  const { coinList = [], onItemClick } = props;
   const dropdownItems = coinList.map((item) => {
     return (
-      <div className="dropdown-item" key={item.id} onClick>
+      <div className="dropdown-item" key={item.id} onClick={() => onItemClick(item.id)}>
         <span className="position text-primary me-3">{ item.market_cap_rank }</span>
         <span className="item-name text-success">{ item.name }</span>
       </div>

@@ -196,7 +196,7 @@ export default class App extends Component {
                                         currentOptions={this.state.options} />
                           </TabContent>
                         )
-                        : <ErrorMessage title='Sorry' message='You didnt select any favorite coin' /> ;
+                        : <ErrorMessage title='Sorry' message='You did not select any favorite coin' /> ;
 
     return (
       <div className="App">
@@ -206,7 +206,7 @@ export default class App extends Component {
               <Select label="Auto Reload" defaultValue='0' 
                                             options={ selectAutoReloadTiming } 
                                             onSelect={ this.onSetReloadTime } />
-              <SearchForm />
+              <SearchForm onItemClick={this.openPopup} popup={this.state.popupOpen} />
               <Reload onReload={ this.onReload } />
             </div>
             <nav className="navbar navbar-expand-lg">

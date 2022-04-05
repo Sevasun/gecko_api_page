@@ -1,38 +1,33 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 
-export default class FavoritesButton extends Component {
-  state = {
-    isActive: false
-  };
+const FavoritesButton = (props) => {
 
-  componentDidMount() {
-    this.checkFavorite();
+  const [ isActive, setActive ] = useState(false);
+
+  const onButtonClick = () => {
+    setActive((prevActive) => !prevActive);
+    props.onFavorite();
   }
 
-  onButtonClick = () => {
-    this.setState((prevState) => {
-      return {isActive: !prevState.isActive}
-    });
-    this.props.onFavorite();
-  }
-
-  checkFavorite = () => {
-    const { favorites, coin } = this.props;
+  const checkFavorite = () => {
+    const { favorites, coin } = props;
     
     if (favorites.length && favorites.includes(coin)) {
-      this.setState({
-        isActive: true
-      })
+      setActive(true);
     }
   }
 
-  render() {
-    const activeClass = this.state.isActive ? 'active' : null;
+  useEffect(() => {
+    checkFavorite();
+  });
 
-    return (
-      <button className={`star-btn ${activeClass}`} onClick={ this.onButtonClick }>
-        <span className="icon-star-full"></span>
-      </button>
-    );
-  }
+  const activeClass = isActive ? 'active' : null;
+
+  return (
+    <button className={`star-btn ${activeClass}`} onClick={ onButtonClick }>
+      <span className="icon-star-full"></span>
+    </button>
+  );
 }
+
+export default FavoritesButton;

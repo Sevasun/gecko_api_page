@@ -25,7 +25,6 @@ export default class Popup extends Component {
   }
   
   render() {
-    console.log(this.state.coin);
 
     const { 
           id = "",
