@@ -11,6 +11,9 @@ import ErrorMessage from "../error-message/error-message";
 import Select from "../select";
 import SearchForm from "../search-form";
 import { selectAutoReloadTiming } from "../../modules/helpers/data";
+import { FavoriteProvider } from "../context/context";
+import { CoinTableHead, CoinTableRow } from "../coin-table-rows";
+import { StepnTableHead, StepnTableRow } from "../stepn-table-rows";
 
 export default class App extends Component {
   api = new GeckoApi();
@@ -36,7 +39,7 @@ export default class App extends Component {
   tabs = [
     {id: 'tab-1', value: 'All coins', fn: (id) => this.setDefaultTab(id)},
     {id: 'tab-2', value: 'Favorites', fn: (id) => this.setFavoriteTab(id)},
-    {id: 'tab-3', value: 'To do', fn: null}
+    {id: 'tab-3', value: 'StepN', fn: (id) => this.setStepnTab(id)}
   ];
 
   componentDidMount() {
@@ -118,6 +121,14 @@ export default class App extends Component {
     this.updateCoinList(this.state.options, this.state.ids);
   };
 
+  setStepnTab = (id) => {
+    const options = {...this.state.options, ids: ['solana', 'stepn', 'green-satoshi-token']};
+    
+    this.setActiveTab(id);
+    
+    this.updateCoinList(options, ['solana', 'stepn', 'green-satoshi-token']);
+  }
+
   onFavoriteClick = (id) => {
     const { ids } = this.state;
     let newIds;
@@ -181,20 +192,35 @@ export default class App extends Component {
   };
 
   render() {
-    const popup = this.state.popupOpen ? <Popup id={ this.state.popupOpen } closePopup={this.closePopup} /> : null;
+    const tableHead = this.state.activeTab === 'tab-3' ? <StepnTableHead /> : <CoinTableHead />;
+    const tableBody = this.state.activeTab === 'tab-3' 
+                                                ? <StepnTableRow coins={ this.state.coins } /> 
+                                                : <CoinTableRow 
+                                                    coins={ this.state.coins } 
+                                                    favorites={this.state.ids}
+                                                    onFavorite={ this.onFavoriteClick } 
+                                                    onCoinClick={ this.openPopup }
+                                                  />;
+    const popup = this.state.popupOpen 
+                  ? <Popup id={ this.state.popupOpen } 
+                            closePopup={ this.closePopup }
+                            getCoinInfo={ this.api.getCoinInfo } /> 
+                  : null;
     const tabContent = !this.state.error 
                         ? (
-                          <TabContent>
-                            <Table coins={ this.state.coins } 
-                                    favorites={this.state.ids}
-                                    onFavorite={ this.onFavoriteClick } 
-                                    onCoinClick={ this.openPopup } />
+                          <FavoriteProvider value={ this.onFavoriteClick }>
+                            <TabContent>
+                              <Table coins={ this.state.coins } 
+                                      head={tableHead}>
+                                { tableBody }
+                              </Table>
 
-                            <Pagination onClickPrev={this.onClickPrev} 
-                                        onClickNext={this.onClickNext} 
-                                        onSelect={this.onQuantitySelect}
-                                        currentOptions={this.state.options} />
-                          </TabContent>
+                              <Pagination onClickPrev={this.onClickPrev} 
+                                          onClickNext={this.onClickNext} 
+                                          onSelect={this.onQuantitySelect}
+                                          currentOptions={this.state.options} />
+                            </TabContent>
+                          </FavoriteProvider>
                         )
                         : <ErrorMessage title='Sorry' message='You did not select any favorite coin' /> ;
 
@@ -206,7 +232,9 @@ export default class App extends Component {
               <Select label="Auto Reload" defaultValue='0' 
                                             options={ selectAutoReloadTiming } 
                                             onSelect={ this.onSetReloadTime } />
-              <SearchForm onItemClick={this.openPopup} popup={this.state.popupOpen} />
+              <SearchForm onItemClick={this.openPopup} 
+                          popup={this.state.popupOpen}
+                          searchCoin={this.api.searchCoin} />
               <Reload onReload={ this.onReload } />
             </div>
             <nav className="navbar navbar-expand-lg">

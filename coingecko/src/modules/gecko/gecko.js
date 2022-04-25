@@ -22,16 +22,16 @@ export default class GeckoApi {
     return fullUrl;
   };
 
-  ping = () => {
+  ping = async () => {
     const url = this.transformUrl("ping");
-    const request = fetch(url)
-      .then((response) => {
+    const request = await fetch(url).then((response) => {
         if (!response.ok) {
-          console.log("Error", response);
+          return false;
         }
-        return response.json();
-      })
-      .then((json) => console.log(json));
+        return true;
+      });
+
+    return request;
   };
 
   coinsList = async (options) => {
@@ -43,15 +43,7 @@ export default class GeckoApi {
       sparkline: "false",
       price_change_percentage: "24h"
     };
-    let clearOptions = {};
-
-    if (options) {
-      for (let prop in options) {
-        if (options[prop]) {
-          clearOptions[prop] = options[prop]
-        }
-      }
-    }
+    let clearOptions = {...options};
 
     const optionsObject = { ...defaults, ...clearOptions };
 

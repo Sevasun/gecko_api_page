@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import GeckoApi from "../../modules/gecko";
 import Dropdown from "../dropdown";
 import './search-form.css';
 
 const SearchForm = (props) => {
-  const { searchCoin } = new GeckoApi();
+  const { searchCoin } = props;
   const [coins, setCoins] = useState(null);
   const [value, setValue] = useState('');
 

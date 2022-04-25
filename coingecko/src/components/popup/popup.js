@@ -1,23 +1,19 @@
 import React, { Component } from "react";
 import "./popup.css";
-import Loader from "../loader";
-import GeckoApi from "../../modules/gecko";
 import PopupWrap from "../popup-wrap";
 import { round, spanColor } from "../../modules/helpers";
 
 export default class Popup extends Component {
   state = {
     coin: null
-  }
-
-  gecko = new GeckoApi();
+  };
 
   componentDidMount() {
-    this.getCoinInfo(this.props.id);
+    this.getInfo(this.props.id);
   }
 
-  getCoinInfo = (id) => {
-    this.gecko.getCoinInfo(id).then((data) => {
+  getInfo = (id) => {
+    this.props.getCoinInfo(id).then((data) => {
       this.setState({
         coin: data
       })

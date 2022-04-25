@@ -1,5 +1,4 @@
 import React from "react";
-import Popup from "../popup";
 
 const Coin = (props) => {
   const { children, onCoinClick } = props;
